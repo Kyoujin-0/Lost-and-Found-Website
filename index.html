@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Lost & Found</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+  <div class="header-title">
+    <h1>Lost & Found</h1>
+    <p>University Campus</p>
+  </div>
+
+  <div class="header-actions">
+    <label class="switch-button" for="themeToggle">
+      <div class="switch-outer">
+        <input
+          id="themeToggle"
+          class="theme-toggle"
+          type="checkbox"
+          title="Toggle Dark Mode"
+        />
+        <div class="button">
+          <span class="button-toggle"></span>
+          <span class="button-indicator"></span>
+        </div>
+      </div>
+    </label>
+
+    <button id="reportBtn" class="btn-primary">
+      <span>+</span>
+      Report Item
+    </button>
+  </div>
+</div>
+
+            <div class="search-filter-row">
+                <div class="search-container">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search for items..." class="search-input">
+                </div>
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">All Categories</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Personal Items">Personal Items</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Documents">Documents</option>
+                    <option value="Keys">Keys</option>
+                    <option value="Books">Books</option>
+                </select>
+                <select id="sortFilter" class="filter-select">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="claimed">Claimed</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="tabs">
+            <button id="lostTab" class="tab active">Lost Items</button>
+            <button id="foundTab" class="tab">Found Items</button>
+        </div>
+
+        <div id="itemsGrid" class="items-grid"></div>
+    </main>
+
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <button id="closeModal" class="close-btn">&times;</button>
+            <h2>Report an Item</h2>
+            
+            <div class="image-option-toggle">
+                <button type="button" class="toggle-btn active" id="imageToggle">Upload Picture</button>
+                <button type="button" class="toggle-btn" id="emojiToggle">Use Emoji</button>
+            </div>
+            
+            <div class="form-group" id="imageSection">
+                <label>Upload Picture</label>
+                <div class="image-upload-area" id="uploadArea">
+                    <p style="color: #64748b; margin-bottom: 8px;">Click to upload or drag and drop</p>
+                    <p style="color: #94a3b8; font-size: 12px;">PNG, JPG, GIF up to 5MB</p>
+                </div>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            </div>
+            
+            <div class="form-group hidden" id="emojiSection">
+                <label>Select an Emoji</label>
+                <div class="emoji-selector" id="emojiSelector">
+                    <div class="emoji-option selected" data-emoji="📱">📱</div>
+                    <div class="emoji-option" data-emoji="🎒">🎒</div>
+                    <div class="emoji-option" data-emoji="👕">👕</div>
+                    <div class="emoji-option" data-emoji="🧴">🧴</div>
+                    <div class="emoji-option" data-emoji="🆔">🆔</div>
+                    <div class="emoji-option" data-emoji="🔑">🔑</div>
+                    <div class="emoji-option" data-emoji="📚">📚</div>
+                    <div class="emoji-option" data-emoji="🎧">🎧</div>
+                    <div class="emoji-option" data-emoji="💻">💻</div>
+                    <div class="emoji-option" data-emoji="⌚">⌚</div>
+                    <div class="emoji-option" data-emoji="👓">👓</div>
+                    <div class="emoji-option" data-emoji="📷">📷</div>
+                    <div class="emoji-option" data-emoji="🔌">🔌</div>
+                    <div class="emoji-option" data-emoji="💳">💳</div>
+                    <div class="emoji-option" data-emoji="🧢">🧢</div>
+                    <div class="emoji-option" data-emoji="🧥">🧥</div>
+                    <div class="emoji-option" data-emoji="👟">👟</div>
+                    <div class="emoji-option" data-emoji="🎮">🎮</div>
+                    <div class="emoji-option" data-emoji="🎵">🎵</div>
+                    <div class="emoji-option" data-emoji="⚽">⚽</div>
+                    <div class="emoji-option" data-emoji="🎨">🎨</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Item Type</label>
+                <select id="itemType">
+                    <option>Lost</option>
+                    <option>Found</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Item Name *</label>
+                <input type="text" id="itemName" placeholder="e.g., Black Wallet">
+            </div>
+            <div class="form-group">
+                <label>Location *</label>
+                <input type="text" id="itemLocation" placeholder="e.g., Library 3rd Floor">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="itemCategory">
+                    <option>Electronics</option>
+                    <option>Personal Items</option>
+                    <option>Clothing</option>
+                    <option>Accessories</option>
+                    <option>Documents</option>
+                    <option>Keys</option>
+                    <option>Books</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="itemDescription" placeholder="Add any additional details about the item..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Contact Email <span id="emailRequired">*</span></label>
+                <input type="email" id="contactEmail" placeholder="your.email@university.edu">
+            </div>
+            <div class="form-group">
+                <label>Contact Phone (Optional)</label>
+                <input type="tel" id="contactPhone" placeholder="(123) 456-7890">
+            </div>
+            <button id="submitBtn" class="btn-submit">Submit Report</button>
+        </div>
+    </div>
+
+    <div id="detailsModal" class="modal">
+        <div class="modal-content large">
+            <button id="closeDetailsModal" class="close-btn">&times;</button>
+            <div id="detailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Image Zoom Modal -->
+    <div id="imageZoomModal" class="image-zoom-modal">
+        <button class="zoom-close-btn">&times;</button>
+        <img id="zoomedImage" src="" alt="Zoomed image">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
