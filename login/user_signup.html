@@ -1,10 +1,9 @@
-</body>
-</html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Lost & Found</title>
+    <title>Register - Lost & Found</title>
     <style>
         * {
             margin: 0;
@@ -22,27 +21,27 @@
             padding: 20px;
         }
 
-        .login-container {
+        .register-container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
         }
 
-        .login-header {
+        .register-header {
             text-align: center;
             margin-bottom: 30px;
         }
 
-        .login-header h1 {
+        .register-header h1 {
             font-size: 32px;
             color: #333;
             margin-bottom: 8px;
         }
 
-        .login-header p {
+        .register-header p {
             color: #666;
             font-size: 14px;
         }
@@ -59,11 +58,17 @@
             font-size: 14px;
         }
 
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
         .input-wrapper {
             position: relative;
         }
 
-        .neu-input input {
+        input {
             width: 100%;
             padding: 14px 16px;
             border: 2px solid #e2e8f0;
@@ -73,15 +78,11 @@
             background: #f8fafc;
         }
 
-        .neu-input input:focus {
+        input:focus {
             outline: none;
             border-color: #667eea;
             background: white;
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-
-        .password-wrapper {
-            position: relative;
         }
 
         .password-toggle {
@@ -111,11 +112,11 @@
             height: auto;
         }
 
-        .form-group.error .neu-input input {
+        .form-group.error input {
             border-color: #ef4444;
         }
 
-        .login-btn {
+        .register-btn {
             width: 100%;
             padding: 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -129,26 +130,22 @@
             margin-top: 10px;
         }
 
-        .login-btn:hover {
+        .register-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
-        .login-btn:disabled {
+        .register-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
 
-        .login-btn.loading {
+        .register-btn.loading {
             position: relative;
             color: transparent;
         }
 
-        .login-btn.loading::after {
+        .register-btn.loading::after {
             content: "";
             position: absolute;
             width: 20px;
@@ -167,35 +164,21 @@
             to { transform: rotate(360deg); }
         }
 
-        .divider {
+        .login-link {
             text-align: center;
-            margin: 24px 0;
-            color: #999;
-            font-size: 14px;
-        }
-
-        .demo-credentials {
-            background: #f0f9ff;
-            border: 2px solid #bfdbfe;
-            border-radius: 12px;
-            padding: 16px;
             margin-top: 20px;
-        }
-
-        .demo-credentials h3 {
+            color: #666;
             font-size: 14px;
-            color: #1e40af;
-            margin-bottom: 8px;
         }
 
-        .demo-credentials p {
-            font-size: 13px;
-            color: #1e40af;
-            margin: 4px 0;
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
         }
 
-        .demo-credentials strong {
-            color: #1e3a8a;
+        .login-link a:hover {
+            text-decoration: underline;
         }
 
         .success-message {
@@ -247,128 +230,222 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
         }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>🔐 Login</h1>
-            <p>Lost & Found System</p>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>📝 Register</h1>
+            <p>Create your Lost & Found account</p>
         </div>
 
-        <form id="loginForm">
+        <form id="registerForm">
             <div class="form-group">
-                <label for="email">Username / Email / Student ID</label>
-                <div class="neu-input">
+                <label for="studentId">Student ID *</label>
+                <input 
+                    type="text" 
+                    id="studentId" 
+                    placeholder="e.g., 2024-12345"
+                    required
+                >
+                <div class="error-message" id="studentIdError"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username *</label>
                     <input 
                         type="text" 
-                        id="email" 
-                        placeholder="Enter username, email, or student ID"
-                        autocomplete="username"
+                        id="username" 
+                        placeholder="Choose a username"
+                        required
                     >
+                    <div class="error-message" id="usernameError"></div>
                 </div>
+
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input 
+                        type="text" 
+                        id="fullName" 
+                        placeholder="Your full name"
+                        required
+                    >
+                    <div class="error-message" id="fullNameError"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    placeholder="your.email@university.edu"
+                    required
+                >
                 <div class="error-message" id="emailError"></div>
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
-                <div class="neu-input password-wrapper">
+                <label for="phone">Phone Number (optional)</label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    placeholder="555-123-4567"
+                >
+                <div class="error-message" id="phoneError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <div class="input-wrapper">
                     <input 
                         type="password" 
                         id="password" 
-                        placeholder="Enter your password"
-                        autocomplete="current-password"
+                        placeholder="At least 6 characters"
+                        required
                     >
                     <button type="button" class="password-toggle" id="passwordToggle">👁️</button>
                 </div>
                 <div class="error-message" id="passwordError"></div>
             </div>
 
-            <button type="submit" class="login-btn">Login</button>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password *</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        placeholder="Re-enter password"
+                        required
+                    >
+                    <button type="button" class="password-toggle" id="confirmPasswordToggle">👁️</button>
+                </div>
+                <div class="error-message" id="confirmPasswordError"></div>
+            </div>
+
+            <button type="submit" class="register-btn">Create Account</button>
         </form>
 
-        <div class="demo-credentials">
-            <h3>📝 Demo Credentials:</h3>
-            <p><strong>Username:</strong> john_doe</p>
-            <p><strong>Password:</strong> password123</p>
-            <p style="margin-top: 8px; font-size: 12px; color: #64748b;">
-                Or use: jane_smith / mike_wilson
-            </p>
+        <div class="login-link">
+            Already have an account? <a href="temp_login.html">Login here</a>
         </div>
 
         <div class="success-message" id="successMessage">
-            <div class="success-icon neu-icon">✓</div>
-            <h2>Login Successful!</h2>
-            <p>Redirecting to dashboard...</p>
+            <div class="success-icon">✓</div>
+            <h2>Registration Successful!</h2>
+            <p>Redirecting to login...</p>
         </div>
     </div>
 
-    <!-- Include your fixed login JavaScript -->
     <script>
-        // Neumorphism Login Form JavaScript
         const API_URL = 'http://localhost:5000/api';
 
-        class NeumorphismLoginForm {
+        class RegistrationForm {
             constructor() {
-                this.form = document.getElementById('loginForm');
-                this.emailInput = document.getElementById('email');
-                this.passwordInput = document.getElementById('password');
-                this.passwordToggle = document.getElementById('passwordToggle');
-                this.submitButton = this.form.querySelector('.login-btn');
+                this.form = document.getElementById('registerForm');
+                this.submitButton = this.form.querySelector('.register-btn');
                 this.successMessage = document.getElementById('successMessage');
                 
                 this.init();
-
             }
             
             init() {
-                this.bindEvents();
-                this.setupPasswordToggle();
-            }
-            
-            bindEvents() {
+                this.setupPasswordToggles();
                 this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-                this.emailInput.addEventListener('blur', () => this.validateEmail());
-                this.passwordInput.addEventListener('blur', () => this.validatePassword());
-                this.emailInput.addEventListener('input', () => this.clearError('email'));
-                this.passwordInput.addEventListener('input', () => this.clearError('password'));
-            }
-            
-            setupPasswordToggle() {
-                this.passwordToggle.addEventListener('click', () => {
-                    const type = this.passwordInput.type === 'password' ? 'text' : 'password';
-                    this.passwordInput.type = type;
-                    this.passwordToggle.textContent = type === 'text' ? '🙈' : '👁️';
+                
+                // Clear errors on input
+                ['studentId', 'username', 'fullName', 'email', 'phone', 'password', 'confirmPassword'].forEach(field => {
+                    const input = document.getElementById(field);
+                    if (input) {
+                        input.addEventListener('input', () => this.clearError(field));
+                    }
                 });
             }
             
-            validateEmail() {
-                const email = this.emailInput.value.trim();
+            setupPasswordToggles() {
+                document.getElementById('passwordToggle').addEventListener('click', () => {
+                    const input = document.getElementById('password');
+                    const toggle = document.getElementById('passwordToggle');
+                    const type = input.type === 'password' ? 'text' : 'password';
+                    input.type = type;
+                    toggle.textContent = type === 'text' ? '🙈' : '👁️';
+                });
                 
-                if (!email) {
-                    this.showError('email', 'Email/Username is required');
-                    return false;
-                }
-                
-                this.clearError('email');
-                return true;
+                document.getElementById('confirmPasswordToggle').addEventListener('click', () => {
+                    const input = document.getElementById('confirmPassword');
+                    const toggle = document.getElementById('confirmPasswordToggle');
+                    const type = input.type === 'password' ? 'text' : 'password';
+                    input.type = type;
+                    toggle.textContent = type === 'text' ? '🙈' : '👁️';
+                });
             }
             
-            validatePassword() {
-                const password = this.passwordInput.value;
+            validateForm() {
+                let isValid = true;
                 
+                // Student ID
+                const studentId = document.getElementById('studentId').value.trim();
+                if (!studentId) {
+                    this.showError('studentId', 'Student ID is required');
+                    isValid = false;
+                }
+                
+                // Username
+                const username = document.getElementById('username').value.trim();
+                if (!username) {
+                    this.showError('username', 'Username is required');
+                    isValid = false;
+                } else if (username.length < 3) {
+                    this.showError('username', 'Username must be at least 3 characters');
+                    isValid = false;
+                }
+                
+                // Full Name
+                const fullName = document.getElementById('fullName').value.trim();
+                if (!fullName) {
+                    this.showError('fullName', 'Full name is required');
+                    isValid = false;
+                }
+                
+                // Email
+                const email = document.getElementById('email').value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email) {
+                    this.showError('email', 'Email is required');
+                    isValid = false;
+                } else if (!emailRegex.test(email)) {
+                    this.showError('email', 'Please enter a valid email');
+                    isValid = false;
+                }
+                
+                // Password
+                const password = document.getElementById('password').value;
                 if (!password) {
                     this.showError('password', 'Password is required');
-                    return false;
-                }
-                
-                if (password.length < 6) {
+                    isValid = false;
+                } else if (password.length < 6) {
                     this.showError('password', 'Password must be at least 6 characters');
-                    return false;
+                    isValid = false;
                 }
                 
-                this.clearError('password');
-                return true;
+                // Confirm Password
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                if (!confirmPassword) {
+                    this.showError('confirmPassword', 'Please confirm your password');
+                    isValid = false;
+                } else if (password !== confirmPassword) {
+                    this.showError('confirmPassword', 'Passwords do not match');
+                    isValid = false;
+                }
+                
+                return isValid;
             }
             
             showError(field, message) {
@@ -385,7 +462,6 @@
                     input.style.animation = '';
                 }, 500);
             }
-
             
             clearError(field) {
                 const formGroup = document.getElementById(field).closest('.form-group');
@@ -393,81 +469,82 @@
                 
                 formGroup.classList.remove('error');
                 errorElement.classList.remove('show');
-                setTimeout(() => {
-                    errorElement.textContent = '';
-                }, 300);
             }
             
             async handleSubmit(e) {
                 e.preventDefault();
                 
-                const isEmailValid = this.validateEmail();
-                const isPasswordValid = this.validatePassword();
-                
-                if (!isEmailValid || !isPasswordValid) {
+                if (!this.validateForm()) {
                     return;
                 }
                 
                 this.setLoading(true);
                 
                 try {
-                    const response = await fetch(`${API_URL}/auth/login`, {
+                    const formData = {
+                        studentId: document.getElementById('studentId').value.trim(),
+                        username: document.getElementById('username').value.trim(),
+                        email: document.getElementById('email').value.trim(),
+                        password: document.getElementById('password').value,
+                        fullName: document.getElementById('fullName').value.trim(),
+                        phone: document.getElementById('phone').value.trim() || null
+                    };
+                    
+                    const response = await fetch(`${API_URL}/auth/register`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            identifier: this.emailInput.value.trim(),
-                            password: this.passwordInput.value
-                        })
+                        body: JSON.stringify(formData)
                     });
                     
                     const data = await response.json();
                     
                     if (!response.ok) {
-                        throw new Error(data.message || 'Login failed');
+                        throw new Error(data.message || 'Registration failed');
                     }
                     
+                    // Store token and user data (auto-login)
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    this.showNeumorphicSuccess();
+                    this.showSuccess();
                     
                 } catch (error) {
-                    console.error('Login error:', error);
-                    this.showError('password', error.message || 'Login failed. Please check your backend is running.');
+                    console.error('Registration error:', error);
+                    alert('❌ ' + (error.message || 'Registration failed. Please try again.'));
                 } finally {
                     this.setLoading(false);
                 }
             }
-
             
             setLoading(loading) {
                 this.submitButton.classList.toggle('loading', loading);
                 this.submitButton.disabled = loading;
             }
             
-            showNeumorphicSuccess() {
+            showSuccess() {
                 this.form.style.transform = 'scale(0.95)';
                 this.form.style.opacity = '0';
                 
                 setTimeout(() => {
                     this.form.style.display = 'none';
+                    document.querySelector('.login-link').style.display = 'none';
                     this.successMessage.classList.add('show');
                     
                     const successIcon = this.successMessage.querySelector('.success-icon');
                     successIcon.style.animation = 'successPulse 0.6s ease-out';
                 }, 300);
                 
+                // Redirect to dashboard (auto-login with stored token)
                 setTimeout(() => {
                     window.location.href = '../dashboard.html';
                 }, 2500);
             }
         }
 
-
         document.addEventListener('DOMContentLoaded', () => {
-            new NeumorphismLoginForm();
+            new RegistrationForm();
         });
     </script>
 </body>

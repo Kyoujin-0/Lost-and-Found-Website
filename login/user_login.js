@@ -1,4 +1,6 @@
 // Neumorphism Login Form JavaScript
+const API_URL = 'http://localhost:5000/api';
+
 class NeumorphismLoginForm {
     constructor() {
         this.form = document.getElementById('loginForm');
@@ -122,15 +124,11 @@ class NeumorphismLoginForm {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         
         if (!email) {
-            this.showError('email', 'Email is required');
+            this.showError('email', 'Email/Username is required');
             return false;
         }
         
-        if (!emailRegex.test(email)) {
-            this.showError('email', 'Please enter a valid email');
-            return false;
-        }
-        
+        // Allow username, email, or student ID
         this.clearError('email');
         return true;
     }
@@ -193,13 +191,34 @@ class NeumorphismLoginForm {
         this.setLoading(true);
         
         try {
-            // Simulate soft authentication
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Call actual backend API
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    identifier: this.emailInput.value.trim(), // Can be email, username, or studentId
+                    password: this.passwordInput.value
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Login failed');
+            }
+            
+            // Store token and user data
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
             
             // Show neumorphic success
             this.showNeumorphicSuccess();
+            
         } catch (error) {
-            this.showError('password', 'Login failed. Please try again.');
+            console.error('Login error:', error);
+            this.showError('password', error.message || 'Login failed. Please try again.');
         } finally {
             this.setLoading(false);
         }
@@ -214,8 +233,8 @@ class NeumorphismLoginForm {
         
         try {
             await new Promise(resolve => setTimeout(resolve, 1500));
-            console.log(`Redirecting to ${provider} authentication...`);
-            // window.location.href = `/auth/${provider.toLowerCase()}`;
+            console.log(`${provider} login not yet implemented`);
+            alert(`${provider} login will be implemented soon!`);
         } catch (error) {
             console.error(`${provider} authentication failed: ${error.message}`);
         } finally {
@@ -254,10 +273,10 @@ class NeumorphismLoginForm {
             
         }, 300);
         
-        // Simulate redirect
+        // Redirect to dashboard (go up one folder level)
         setTimeout(() => {
             console.log('Redirecting to dashboard...');
-            window.location.href = 'index.html';
+            window.location.href = '../dashboard.html'; // FIXED: Go up one folder level
         }, 2500);
     }
 }

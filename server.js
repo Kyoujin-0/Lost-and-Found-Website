@@ -16,8 +16,17 @@ const uploadRoutes = require('./routes/upload');
 const app = express();
 
 // Middleware
+// Middleware
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: [
+        'http://localhost:3000',
+        'http://localhost:8000',
+        'http://localhost:8080',
+        'http://127.0.0.1:8000',
+        'http://127.0.0.1:8080',
+        'http://127.0.0.1:5500', // VS Code Live Server
+        process.env.CLIENT_URL
+    ].filter(Boolean),
     credentials: true
 }));
 app.use(express.json());
