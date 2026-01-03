@@ -16,38 +16,6 @@ let useEmoji = false;
 let currentItemId = null;
 
 // ============================================
-// DOM ELEMENTS
-// ============================================
-const lostTab = document.getElementById("lostTab");
-const foundTab = document.getElementById("foundTab");
-const itemsGrid = document.getElementById("itemsGrid");
-const reportBtn = document.getElementById("reportBtn");
-const reportModal = document.getElementById("reportModal");
-const closeModal = document.getElementById("closeModal");
-const submitBtn = document.getElementById("submitBtn");
-const searchInput = document.getElementById("searchInput");
-const categoryFilter = document.getElementById("categoryFilter");
-const sortFilter = document.getElementById("sortFilter");
-const statusFilter = document.getElementById("statusFilter");
-const emojiToggle = document.getElementById("emojiToggle");
-const imageToggle = document.getElementById("imageToggle");
-const emojiSection = document.getElementById("emojiSection");
-const imageSection = document.getElementById("imageSection");
-const uploadArea = document.getElementById("uploadArea");
-const imageInput = document.getElementById("imageInput");
-const emojiSelector = document.getElementById("emojiSelector");
-const detailsModal = document.getElementById("detailsModal");
-const closeDetailsModal = document.getElementById("closeDetailsModal");
-const detailsContent = document.getElementById("detailsContent");
-const itemTypeSelect = document.getElementById("itemType");
-const emailRequired = document.getElementById("emailRequired");
-const themeToggle = document.getElementById("themeToggle");
-const loadingOverlay = document.getElementById("loadingOverlay");
-const toastContainer = document.getElementById("toastContainer");
-const imageZoomModal = document.getElementById("imageZoomModal");
-const zoomedImage = document.getElementById("zoomedImage");
-
-// ============================================
 // AUTHENTICATION CHECK
 // ============================================
 function checkAuth() {
@@ -58,7 +26,7 @@ function checkAuth() {
     
     if (!token || !userStr) {
         console.log('❌ No token or user, redirecting to login');
-        window.location.href = 'login/temp_login.html';
+        window.location.href = 'login/user_login.html';
         return false;
     }
     
@@ -73,10 +41,25 @@ function checkAuth() {
     }
 }
 
+function displayUserInfo() {
+    const userAvatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    const userStudentId = document.getElementById('userStudentId');
+    
+    if (currentUser && userAvatar && userName && userStudentId) {
+        // Show first letter of username
+        userAvatar.textContent = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '?';
+        // Show username
+        userName.textContent = currentUser.username || 'User';
+        // Show student ID
+        userStudentId.textContent = currentUser.studentId || '---';
+    }
+}
+
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = 'login/temp_login.html';
+    window.location.href = 'login/user_login.html';
 }
 
 // ============================================
@@ -123,6 +106,9 @@ async function apiCall(endpoint, options = {}) {
 // TOAST NOTIFICATION SYSTEM
 // ============================================
 function showToast(message, type = "info") {
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) return;
+    
     const toast = document.createElement("div");
     toast.className = "toast " + type;
 
@@ -165,321 +151,15 @@ function showToast(message, type = "info") {
 // IMAGE ZOOM (Make global for onclick)
 // ============================================
 window.openImageZoom = function(imageSrc) {
-    zoomedImage.src = imageSrc;
-    imageZoomModal.classList.add("active");
+    const imageZoomModal = document.getElementById('imageZoomModal');
+    const zoomedImage = document.getElementById('zoomedImage');
+    if (zoomedImage) zoomedImage.src = imageSrc;
+    if (imageZoomModal) imageZoomModal.classList.add("active");
 }
 
 window.closeImageZoom = function() {
-    imageZoomModal.classList.remove("active");
-}
-
-// ============================================
-// DARK MODE
-// ============================================
-function initDarkMode() {
-    console.log('🌙 Initializing dark mode...');
-    
-    // Check if dark mode was previously enabled
-    if (localStorage.getItem("darkMode") === "enabled") {
-        document.body.classList.add("dark-mode");
-        themeToggle.textContent = '☀️';
-    }
-
-    // Toggle dark mode on click
-    themeToggle.addEventListener("click", function() {
-        console.log('🌙 Dark mode button clicked!');
-        const isDark = document.body.classList.toggle("dark-mode");
-        themeToggle.textContent = isDark ? '☀️' : '🌙';
-        localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
-        console.log('🌙 Dark mode is now:', isDark ? 'enabled' : 'disabled');
-    });
-}
-
-// ============================================
-// SUBMIT REPORT (Define before setupEventListeners)
-// ============================================
-async function submitReport() {
-    const itemType = document.getElementById("itemType").value;
-    const itemName = document.getElementById("itemName").value.trim();
-    const itemLocation = document.getElementById("itemLocation").value.trim();
-    const itemCategory = document.getElementById("itemCategory").value;
-    const itemDescription = document.getElementById("itemDescription").value.trim();
-    const contactEmail = document.getElementById("contactEmail").value.trim();
-    const contactPhone = document.getElementById("contactPhone").value.trim();
-
-    if (!itemName || !itemLocation) {
-        showToast("Please fill in Item Name and Location!", "error");
-        return;
-    }
-
-    if (itemType === "Lost" && !contactEmail) {
-        showToast("Contact Email is required for lost items!", "error");
-        return;
-    }
-
-    if (!useEmoji && !uploadedImageFile) {
-        showToast("Please upload an image or switch to emoji!", "error");
-        return;
-    }
-
-    showLoading(true);
-
-    try {
-        let imageUrl = null;
-        
-        // Upload image if selected
-        if (!useEmoji && uploadedImageFile) {
-            const formData = new FormData();
-            formData.append('image', uploadedImageFile);
-            
-            const token = localStorage.getItem('token');
-            const uploadResponse = await fetch(`${API_URL}/upload`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-            
-            const uploadData = await uploadResponse.json();
-            if (!uploadResponse.ok) throw new Error(uploadData.message);
-            imageUrl = uploadData.imageUrl;
-        }
-
-        const today = new Date().toISOString().split('T')[0];
-
-        const itemData = {
-            title: itemName,
-            description: itemDescription || null,
-            category: itemCategory,
-            location: itemLocation,
-            dateLostFound: today,
-            itemType: itemType.toLowerCase(),
-            contactEmail: contactEmail || null,
-            contactPhone: contactPhone || null,
-            emoji: useEmoji ? selectedEmoji : null,
-            imageUrl: imageUrl
-        };
-
-        await apiCall('/items', {
-            method: 'POST',
-            body: JSON.stringify(itemData)
-        });
-
-        activeTab = itemType.toLowerCase();
-        if (activeTab === 'lost') {
-            lostTab.classList.add("active");
-            foundTab.classList.remove("active");
-        } else {
-            foundTab.classList.add("active");
-            lostTab.classList.remove("active");
-        }
-
-        reportModal.classList.remove("active");
-        await fetchItems();
-        showToast("Item reported successfully!", "success");
-    } catch (error) {
-        showToast("Failed to submit report: " + error.message, "error");
-        console.error('Submit error:', error);
-    } finally {
-        showLoading(false);
-    }
-}
-
-// ============================================
-// EVENT LISTENERS SETUP
-// ============================================
-function setupEventListeners() {
-    console.log('🎯 Setting up event listeners...');
-    
-    // Check if all required elements exist
-    const requiredElements = {
-        imageZoomModal, lostTab, foundTab, reportBtn, reportModal, 
-        closeModal, closeDetailsModal, emojiToggle, imageToggle,
-        itemTypeSelect, emojiSelector, uploadArea, imageInput,
-        reportModal, detailsModal, submitBtn, searchInput,
-        categoryFilter, sortFilter, statusFilter
-    };
-    
-    for (const [name, element] of Object.entries(requiredElements)) {
-        if (!element) {
-            console.error('❌ Missing element:', name);
-        }
-    }
-    
-    // Image zoom modal
-    if (imageZoomModal) {
-        imageZoomModal.addEventListener("click", closeImageZoom);
-        const zoomCloseBtn = imageZoomModal.querySelector(".zoom-close-btn");
-        if (zoomCloseBtn) {
-            zoomCloseBtn.addEventListener("click", function (e) {
-                e.stopPropagation();
-                closeImageZoom();
-            });
-        }
-    }
-    }
-    
-    // Tab switching
-    if (lostTab) {
-        lostTab.addEventListener("click", function () {
-            activeTab = "lost";
-            lostTab.classList.add("active");
-            foundTab.classList.remove("active");
-            fetchItems();
-        });
-    }
-
-    if (foundTab) {
-        foundTab.addEventListener("click", function () {
-            activeTab = "found";
-            foundTab.classList.add("active");
-            lostTab.classList.remove("active");
-            fetchItems();
-        });
-    }
-    
-    // Report modal
-    if (reportBtn) {
-        reportBtn.addEventListener("click", function () {
-            console.log('🔘 Report button clicked!');
-            reportModal.classList.add("active");
-            selectedEmoji = "📱";
-            uploadedImage = null;
-            uploadedImageFile = null;
-            useEmoji = false;
-            imageToggle.classList.add("active");
-            emojiToggle.classList.remove("active");
-            imageSection.classList.remove("hidden");
-            emojiSection.classList.add("hidden");
-            uploadArea.classList.remove("has-image");
-            uploadArea.innerHTML =
-                '<p style="color: #64748b; margin-bottom: 8px;">Click to upload or drag and drop</p>' +
-                '<p style="color: #94a3b8; font-size: 12px;">PNG, JPG, GIF up to 5MB</p>';
-            emailRequired.textContent = "*";
-            
-            // Clear form
-            document.getElementById("itemName").value = "";
-            document.getElementById("itemLocation").value = "";
-            document.getElementById("itemDescription").value = "";
-            document.getElementById("contactEmail").value = currentUser ? (currentUser.email || "") : "";
-            document.getElementById("contactPhone").value = currentUser ? (currentUser.phone || "") : "";
-        });
-    }
-
-    if (closeModal) {
-        closeModal.addEventListener("click", function () {
-            reportModal.classList.remove("active");
-        });
-    }
-
-    if (closeDetailsModal) {
-        closeDetailsModal.addEventListener("click", function () {
-            detailsModal.classList.remove("active");
-        });
-    if (emojiToggle) {
-        emojiToggle.addEventListener("click", function () {
-            useEmoji = true;
-            emojiToggle.classList.add("active");
-            imageToggle.classList.remove("active");
-            emojiSection.classList.remove("hidden");
-            imageSection.classList.add("hidden");
-        });
-    }
-
-    if (imageToggle) {
-        imageToggle.addEventListener("click", function () {
-            useEmoji = false;
-            imageToggle.classList.add("active");
-            emojiToggle.classList.remove("active");
-            imageSection.classList.remove("hidden");
-            emojiSection.classList.add("hidden");
-        });
-    }
-
-    if (itemTypeSelect) {
-        itemTypeSelect.addEventListener("change", function () {
-            if (this.value === "Found") {
-                emailRequired.textContent = "(Optional)";
-            } else {
-                emailRequired.textContent = "*";
-            }
-        });
-    }
-
-    if (emojiSelector) {
-        emojiSelector.addEventListener("click", function (e) {
-            if (e.target.classList.contains("emoji-option")) {
-                const allEmojis = emojiSelector.querySelectorAll(".emoji-option");
-                for (let i = 0; i < allEmojis.length; i++) {
-                    allEmojis[i].classList.remove("selected");
-                }
-                e.target.classList.add("selected");
-                selectedEmoji = e.target.getAttribute("data-emoji");
-            }
-        });
-    }
-
-    if (uploadArea) {
-        uploadArea.addEventListener("click", function () {
-            imageInput.click();
-        });
-    }
-
-    if (imageInput) {
-        imageInput.addEventListener("change", function (e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith("image/")) {
-                uploadedImageFile = file;
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    uploadedImage = event.target.result;
-                    uploadArea.classList.add("has-image");
-                    uploadArea.innerHTML =
-                        '<img src="' + uploadedImage + '" class="preview-image" alt="Preview">';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    if (reportModal) {
-        reportModal.addEventListener("click", function (e) {
-            if (e.target === reportModal) {
-                reportModal.classList.remove("active");
-            }
-        });
-    }
-
-    if (detailsModal) {
-        detailsModal.addEventListener("click", function (e) {
-            if (e.target === detailsModal) {
-                detailsModal.classList.remove("active");
-            }
-        });
-    }
-
-    // Submit report
-    if (submitBtn) {
-        submitBtn.addEventListener("click", submitReport);
-    }
-    
-    // Filters
-    let searchTimeout;
-    if (searchInput) {
-        searchInput.addEventListener("input", function () {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                fetchItems();
-            }, 500);
-        });
-    }
-
-    if (categoryFilter) categoryFilter.addEventListener("change", fetchItems);
-    if (sortFilter) sortFilter.addEventListener("change", fetchItems);
-    if (statusFilter) statusFilter.addEventListener("change", fetchItems);
-    
-    console.log('✅ Event listeners setup complete');
+    const imageZoomModal = document.getElementById('imageZoomModal');
+    if (imageZoomModal) imageZoomModal.classList.remove("active");
 }
 
 // ============================================
@@ -519,6 +199,39 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+function showLoading(show) {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = show ? 'flex' : 'none';
+    }
+}
+
+// ============================================
+// DARK MODE
+// ============================================
+function initDarkMode() {
+    console.log('🌙 Initializing dark mode...');
+    const themeToggle = document.getElementById('themeToggle');
+    
+    if (!themeToggle) {
+        console.error('❌ themeToggle button not found!');
+        return;
+    }
+    
+    if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("dark-mode");
+        themeToggle.textContent = '☀️';
+    }
+
+    themeToggle.addEventListener("click", function() {
+        console.log('🌙 Dark mode button clicked!');
+        const isDark = document.body.classList.toggle("dark-mode");
+        themeToggle.textContent = isDark ? '☀️' : '🌙';
+        localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
+        console.log('🌙 Dark mode is now:', isDark ? 'enabled' : 'disabled');
+    });
+}
+
 // ============================================
 // FETCH ITEMS FROM API
 // ============================================
@@ -527,12 +240,17 @@ async function fetchItems() {
     showLoading(true);
     
     try {
+        const statusFilter = document.getElementById('statusFilter');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const searchInput = document.getElementById('searchInput');
+        const sortFilter = document.getElementById('sortFilter');
+        
         const params = new URLSearchParams({
             type: activeTab,
-            status: statusFilter.value === 'all' ? '' : statusFilter.value,
-            category: categoryFilter.value || '',
-            search: searchInput.value || '',
-            sort: sortFilter.value || 'newest'
+            status: statusFilter && statusFilter.value === 'all' ? '' : (statusFilter ? statusFilter.value : ''),
+            category: categoryFilter ? categoryFilter.value || '' : '',
+            search: searchInput ? searchInput.value || '' : '',
+            sort: sortFilter ? sortFilter.value || 'newest' : 'newest'
         });
         
         console.log('🔗 API Call:', `${API_URL}/items?${params}`);
@@ -552,18 +270,17 @@ async function fetchItems() {
     }
 }
 
-function showLoading(show) {
-    if (show) {
-        loadingOverlay.style.display = 'flex';
-    } else {
-        loadingOverlay.style.display = 'none';
-    }
-}
-
 // ============================================
 // RENDER ITEMS
 // ============================================
 function renderItems() {
+    const itemsGrid = document.getElementById('itemsGrid');
+    
+    if (!itemsGrid) {
+        console.error('❌ itemsGrid element not found');
+        return;
+    }
+    
     if (allItems.length === 0) {
         itemsGrid.innerHTML = '<div class="no-items">No items found matching your filters.</div>';
         return;
@@ -654,7 +371,10 @@ async function showItemDetails(itemId) {
         const statusColor = item.status === "claimed" ? "#64748b" : "#22c55e";
         const statusText = item.status === "claimed" ? "Claimed" : "Active";
         
-        const isOwner = item.user_id === currentUser.id;
+        const isOwner = currentUser && item.user_id === currentUser.id;
+
+        const detailsContent = document.getElementById('detailsContent');
+        if (!detailsContent) return;
 
         detailsContent.innerHTML =
             '<div class="detail-icon-large">' + iconHtml + "</div>" +
@@ -704,7 +424,8 @@ async function showItemDetails(itemId) {
             renderComments(comments) +
             "</div>";
 
-        detailsModal.classList.add("active");
+        const detailsModal = document.getElementById('detailsModal');
+        if (detailsModal) detailsModal.classList.add("active");
     } catch (error) {
         showToast('Failed to load item details', 'error');
         console.error('Item details error:', error);
@@ -800,7 +521,8 @@ window.markAsClaimed = async function(itemId) {
             method: 'PATCH'
         });
 
-        detailsModal.classList.remove("active");
+        const detailsModal = document.getElementById('detailsModal');
+        if (detailsModal) detailsModal.classList.remove("active");
         await fetchItems();
         showToast("Item marked as claimed!", "success");
     } catch (error) {
@@ -821,7 +543,8 @@ window.markAsActive = async function(itemId) {
             method: 'PATCH'
         });
 
-        detailsModal.classList.remove("active");
+        const detailsModal = document.getElementById('detailsModal');
+        if (detailsModal) detailsModal.classList.remove("active");
         await fetchItems();
         showToast("Item reactivated!", "success");
     } catch (error) {
@@ -842,7 +565,8 @@ window.deleteItem = async function(itemId) {
             method: 'DELETE'
         });
 
-        detailsModal.classList.remove("active");
+        const detailsModal = document.getElementById('detailsModal');
+        if (detailsModal) detailsModal.classList.remove("active");
         await fetchItems();
         showToast("Item deleted successfully!", "success");
     } catch (error) {
@@ -851,6 +575,8 @@ window.deleteItem = async function(itemId) {
     } finally {
         showLoading(false);
     }
+}
+
 // ============================================
 // SUBMIT REPORT
 // ============================================
@@ -883,7 +609,6 @@ async function submitReport() {
     try {
         let imageUrl = null;
         
-        // Upload image if selected
         if (!useEmoji && uploadedImageFile) {
             const formData = new FormData();
             formData.append('image', uploadedImageFile);
@@ -898,8 +623,9 @@ async function submitReport() {
             });
             
             const uploadData = await uploadResponse.json();
-            if (!uploadResponse.ok) throw new Error(uploadData.message);
-            imageUrl = uploadData.imageUrl;
+                if (!uploadResponse.ok) throw new Error(uploadData.message);
+                console.log('📸 Upload response:', uploadData);
+                imageUrl = uploadData.url;  // ← FIXED! Use .url not .imageUrl
         }
 
         const today = new Date().toISOString().split('T')[0];
@@ -923,15 +649,19 @@ async function submitReport() {
         });
 
         activeTab = itemType.toLowerCase();
+        const lostTab = document.getElementById('lostTab');
+        const foundTab = document.getElementById('foundTab');
+        const reportModal = document.getElementById('reportModal');
+        
         if (activeTab === 'lost') {
-            lostTab.classList.add("active");
-            foundTab.classList.remove("active");
+            if (lostTab) lostTab.classList.add("active");
+            if (foundTab) foundTab.classList.remove("active");
         } else {
-            foundTab.classList.add("active");
-            lostTab.classList.remove("active");
+            if (foundTab) foundTab.classList.add("active");
+            if (lostTab) lostTab.classList.remove("active");
         }
 
-        reportModal.classList.remove("active");
+        if (reportModal) reportModal.classList.remove("active");
         await fetchItems();
         showToast("Item reported successfully!", "success");
     } catch (error) {
@@ -940,6 +670,214 @@ async function submitReport() {
     } finally {
         showLoading(false);
     }
+}
+
+// ============================================
+// EVENT LISTENERS SETUP
+// ============================================
+function setupEventListeners() {
+    console.log('🎯 Setting up event listeners...');
+    
+    const imageZoomModal = document.getElementById('imageZoomModal');
+    const lostTab = document.getElementById('lostTab');
+    const foundTab = document.getElementById('foundTab');
+    const reportBtn = document.getElementById('reportBtn');
+    const reportModal = document.getElementById('reportModal');
+    const closeModal = document.getElementById('closeModal');
+    const closeDetailsModal = document.getElementById('closeDetailsModal');
+    const emojiToggle = document.getElementById('emojiToggle');
+    const imageToggle = document.getElementById('imageToggle');
+    const itemTypeSelect = document.getElementById('itemType');
+    const emojiSelector = document.getElementById('emojiSelector');
+    const uploadArea = document.getElementById('uploadArea');
+    const imageInput = document.getElementById('imageInput');
+    const detailsModal = document.getElementById('detailsModal');
+    const submitBtn = document.getElementById('submitBtn');
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const emojiSection = document.getElementById('emojiSection');
+    const imageSection = document.getElementById('imageSection');
+    const emailRequired = document.getElementById('emailRequired');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    if (imageZoomModal) {
+        imageZoomModal.addEventListener("click", window.closeImageZoom);
+        const zoomCloseBtn = imageZoomModal.querySelector(".zoom-close-btn");
+        if (zoomCloseBtn) {
+            zoomCloseBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                window.closeImageZoom();
+            });
+        }
+    }
+    
+    if (lostTab) {
+        lostTab.addEventListener("click", function () {
+            activeTab = "lost";
+            lostTab.classList.add("active");
+            if (foundTab) foundTab.classList.remove("active");
+            fetchItems();
+        });
+    }
+
+    if (foundTab) {
+        foundTab.addEventListener("click", function () {
+            activeTab = "found";
+            foundTab.classList.add("active");
+            if (lostTab) lostTab.classList.remove("active");
+            fetchItems();
+        });
+    }
+    
+    if (reportBtn) {
+        reportBtn.addEventListener("click", function () {
+            console.log('🔘 Report button clicked!');
+            if (reportModal) reportModal.classList.add("active");
+            selectedEmoji = "📱";
+            uploadedImage = null;
+            uploadedImageFile = null;
+            useEmoji = false;
+            if (imageToggle) imageToggle.classList.add("active");
+            if (emojiToggle) emojiToggle.classList.remove("active");
+            if (imageSection) imageSection.classList.remove("hidden");
+            if (emojiSection) emojiSection.classList.add("hidden");
+            if (uploadArea) {
+                uploadArea.classList.remove("has-image");
+                uploadArea.innerHTML =
+                    '<p style="color: #64748b; margin-bottom: 8px;">Click to upload or drag and drop</p>' +
+                    '<p style="color: #94a3b8; font-size: 12px;">PNG, JPG, GIF up to 5MB</p>';
+            }
+            if (emailRequired) emailRequired.textContent = "*";
+            
+            document.getElementById("itemName").value = "";
+            document.getElementById("itemLocation").value = "";
+            document.getElementById("itemDescription").value = "";
+            document.getElementById("contactEmail").value = currentUser ? (currentUser.email || "") : "";
+            document.getElementById("contactPhone").value = currentUser ? (currentUser.phone || "") : "";
+        });
+    }
+
+    if (closeModal) {
+        closeModal.addEventListener("click", function () {
+            if (reportModal) reportModal.classList.remove("active");
+        });
+    }
+
+    if (closeDetailsModal) {
+        closeDetailsModal.addEventListener("click", function () {
+            if (detailsModal) detailsModal.classList.remove("active");
+        });
+    }
+
+    if (emojiToggle) {
+        emojiToggle.addEventListener("click", function () {
+            useEmoji = true;
+            emojiToggle.classList.add("active");
+            if (imageToggle) imageToggle.classList.remove("active");
+            if (emojiSection) emojiSection.classList.remove("hidden");
+            if (imageSection) imageSection.classList.add("hidden");
+        });
+    }
+
+    if (imageToggle) {
+        imageToggle.addEventListener("click", function () {
+            useEmoji = false;
+            imageToggle.classList.add("active");
+            if (emojiToggle) emojiToggle.classList.remove("active");
+            if (imageSection) imageSection.classList.remove("hidden");
+            if (emojiSection) emojiSection.classList.add("hidden");
+        });
+    }
+
+    if (itemTypeSelect) {
+        itemTypeSelect.addEventListener("change", function () {
+            if (this.value === "Found") {
+                if (emailRequired) emailRequired.textContent = "(Optional)";
+            } else {
+                if (emailRequired) emailRequired.textContent = "*";
+            }
+        });
+    }
+
+    if (emojiSelector) {
+        emojiSelector.addEventListener("click", function (e) {
+            if (e.target.classList.contains("emoji-option")) {
+                const allEmojis = emojiSelector.querySelectorAll(".emoji-option");
+                for (let i = 0; i < allEmojis.length; i++) {
+                    allEmojis[i].classList.remove("selected");
+                    }
+                e.target.classList.add("selected");
+                selectedEmoji = e.target.getAttribute("data-emoji");
+            }
+        });
+    }
+
+    if (uploadArea) {
+        uploadArea.addEventListener("click", function () {
+            if (imageInput) imageInput.click();
+        });
+    }
+
+    if (imageInput) {
+        imageInput.addEventListener("change", function (e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith("image/")) {
+                uploadedImageFile = file;
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    uploadedImage = event.target.result;
+                    if (uploadArea) {
+                        uploadArea.classList.add("has-image");
+                        uploadArea.innerHTML =
+                            '<img src="' + uploadedImage + '" class="preview-image" alt="Preview">';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (reportModal) {
+        reportModal.addEventListener("click", function (e) {
+            if (e.target === reportModal) {
+                reportModal.classList.remove("active");
+            }
+        });
+    }
+
+    if (detailsModal) {
+        detailsModal.addEventListener("click", function (e) {
+            if (e.target === detailsModal) {
+                detailsModal.classList.remove("active");
+            }
+        });
+    }
+
+    if (submitBtn) {
+        submitBtn.addEventListener("click", submitReport);
+    }
+    
+    let searchTimeout;
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetchItems();
+            }, 500);
+        });
+    }
+
+    if (categoryFilter) categoryFilter.addEventListener("change", fetchItems);
+    if (sortFilter) sortFilter.addEventListener("change", fetchItems);
+    if (statusFilter) statusFilter.addEventListener("change", fetchItems);
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", logout);
+    }
+    
+    console.log('✅ Event listeners setup complete');
 }
 
 // ============================================
@@ -955,15 +893,12 @@ async function init() {
     
     console.log('✅ Auth passed, setting up UI...');
     
-    // Initialize dark mode
+    displayUserInfo();
     initDarkMode();
-    
-    // Setup all event listeners
     setupEventListeners();
     
     console.log('📡 Fetching initial data...');
     
-    // Fetch initial data
     await fetchItems();
     
     console.log('✅ Dashboard initialized successfully!');
@@ -973,5 +908,4 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
-}
 }
