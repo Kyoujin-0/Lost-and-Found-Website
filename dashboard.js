@@ -288,7 +288,7 @@ function renderItems() {
 
     itemsGrid.innerHTML = allItems.map(function (item) {
         const iconHtml = item.image_url
-            ? '<img src="' + API_URL.replace('/api', '') + item.image_url + '" alt="' + escapeHtml(item.title) + '" class="zoomable-image">'
+            ? '<img src="' + item.image_url + '" alt="' + escapeHtml(item.title) + '" class="zoomable-image">'
             : (item.emoji || '📦');
 
         const statusBadge = item.status === "claimed"
@@ -365,8 +365,8 @@ async function showItemDetails(itemId) {
         currentItemId = itemId;
         
         const iconHtml = item.image_url
-            ? '<img src="' + API_URL.replace('/api', '') + item.image_url + '" alt="' + escapeHtml(item.title) + '" class="zoomable-image" onclick="event.stopPropagation(); openImageZoom(\'' + API_URL.replace('/api', '') + item.image_url + '\')">'
-            : '<div class="detail-icon-large-emoji">' + (item.emoji || '📦') + "</div>";
+    ? '<img src="' + item.image_url + '" alt="' + escapeHtml(item.title) + '" class="zoomable-image" onclick="event.stopPropagation(); openImageZoom(\'' + item.image_url + '\')">'
+    : '<div class="detail-icon-large-emoji">' + (item.emoji || '📦') + "</div>";
 
         const statusColor = item.status === "claimed" ? "#64748b" : "#22c55e";
         const statusText = item.status === "claimed" ? "Claimed" : "Active";
